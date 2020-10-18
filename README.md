@@ -25,8 +25,9 @@ All report content is find under the directory
 Each can be installed with the respective code:
 
 ```rscript RReqs.R```
+
 ```pip3 install -r PyReqs.txt```
 
 ## Evidence
 
-The evidence for each persons work is find in their respective folders
+The evidence for each persons work is found in their respective folders
