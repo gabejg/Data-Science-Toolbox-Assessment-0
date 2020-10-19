@@ -1,0 +1,30 @@
+## Ignore this for now, just pasting some of the work
+
+        ##   WORK IN PROGRESS
+        
+bot <- read.csv(file = "botnet.csv", header = TRUE)
+botU <- bot[bot$Protocol == "UDP", ]
+botT <- bot[bot$Protocol == "TCP", ]
+botH <- bot[bot$Protocol == "HTTP", ]
+## First look at the frequency of HTTP's
+	  Prots <- tapply(bot$Protocol, bot$Protocol)
+	  bot1 <- cbind(bot, Prots)
+	    ## pie(bot1$Prots)
+	    #png(file = "Protocols_Frequency.png")
+	         par(mfrow = c(2, 2), mar = c(3, 3, 2, 1))
+		          plot(x = bot1$Time, y = bot1$Prots,
+	              xlab="Time elapsed", ylab = "Protocols", main = "Protocols Frequency",
+	              xlim = c(0,500))
+		          plot(x = bot1$Time, y = bot1$Prots,
+	              xlab="Time elapsed", ylab = "Protocols", main = "Protocols Frequency",
+	              xlim = c(501,1000))
+		          plot(x = bot1$Time, y = bot1$Prots,
+	              xlab="Time elapsed", ylab = "Protocols", main = "Protocols Frequency",
+	              xlim = c(1001,1500))
+		          plot(x = bot1$Time, y = bot1$Prots,
+	              xlab="Time elapsed", ylab = "Protocols", main = "Protocols Frequency",
+              	xlim = c(1501,2000)) 
+	    #dev.off()
+  
+  
+	# head(bot1, v)
