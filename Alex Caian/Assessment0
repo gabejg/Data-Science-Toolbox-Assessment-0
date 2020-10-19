@@ -1,3 +1,15 @@
+
+MALWARE USES MULTIPLE WEB SERVERS TO HAVE A PERIODIC HTTP C&C CONNECTION WHILE ITS NETFLOWS ARE NOT PERIODIC
+
+## In this assignment, we take a look at https://mcfp.weebly.com/analysis 
+## where we find an explicit analysis of tracking down a malware inducing SPAM.
+## The procedure is broken down step by step, and a thorough explanation of all steps is presented as follows, from the site previously cited:
+
+	## "While analyzing our capture CTU-Malware-Capture-Botnet-89-1 we found out that there were some strange issues with the periodicity
+	## of the C&C channels. In this capture there were a lot of HTTP connections, but few of them were periodic.
+	## During the analysis of the network capture we usually start looking at the NetFlows and then we move to the payload data.
+	## What we found is that several periodic HTTP connections had non-periodic NetFlows. This was strange for us so we took a deeper look."
+
 ## Ignore this for now, just pasting some of the work
 
         ##   WORK IN PROGRESS
