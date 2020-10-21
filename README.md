@@ -17,6 +17,8 @@ Equity split equally among group members.
 All report content is find under the directory
 * /Report
 
+And should be read in number order.
+
 # Requirements
 
 * All additional packages for R will be listed in RReqs.R
@@ -30,4 +32,4 @@ Each can be installed with the respective code:
 
 ## Evidence
 
-The evidence for each persons work is found in their respective folders
+The evidence for each persons work is found in their respective folders.
