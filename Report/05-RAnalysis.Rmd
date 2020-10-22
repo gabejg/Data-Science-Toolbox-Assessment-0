@@ -1,0 +1,401 @@
+---
+title: "Assessment 0"
+output: html_document
+---
+
+## Introduction 
+
+1) **data source** MACCDC2012 -- Generated with Bro from the 2012 dataset,a nice dataset that has everything from scanning/recon through explotation as well as some c99 shell traffic. Roughly 22694356 total connections.
+
+The network data is divided into different categories, I chose four of them, including dhcp, ftp, smtp, and tunnel, and I observed and compared them, from the perspective of count, timestamp, Originating/Responding endpoint’s TCP/UDP port, and Originating/Responding endpoint’s IP address.
+
+2) **data source** KDD Cup 1999 Data -- contains a standard set of data to be audited, which includes a wide variety of intrusions simulated in a military network environment.
+
+According to the fact that attacks fall into four main categories, including "DOS", "R2L", "U2R", "probing", I divided the network data's result into 5 groups (also includes "normal"), and analyzed the influence of each attribute on the intrusion type.
+
+
+
+## Activity 1.1: Read and observe the data
+
+```{r}
+#"D:\\dst\\data\\...." is my Data storage location.
+dhcpdata<-read.csv("D:\\dst\\data\\dhcp.csv")
+ftpdata<-read.csv("D:\\dst\\data\\ftp.csv")
+smtpdata<-read.csv("D:\\dst\\data\\smtp.csv")
+tunneldata<-read.csv("D:\\dst\\data\\tunnel.csv")
+head(smtpdata)
+```
+
+
+
+## Activity 1.2: Various data's count
+
+```{r}
+data_count<-c(nrow(dhcpdata),nrow(ftpdata),nrow(smtpdata),nrow(tunneldata))
+data_name<-c("dhcp","ftp","smtp","tunnel")
+
+#
+rbind(data_name,data_count)
+
+#Histogram
+barplot(data_count,names.arg=data_name,ylim=c(0,6000),xlab="data_name",ylab="data_count",main="Various data's count",col="#6495ED",border = NA)
+```
+
+From the above frame and histogram, we can get the count of various connections, of which ftp is the most, after all, it is one of the most common protocols in the application layer.
+
+
+
+## Activity 1.3: Various data's timestamp
+
+```{r}
+library(ggplot2)
+
+#Create data frame of dhcp's timestamp 
+number<-c(1:data_count[1])
+time<-dhcpdata$ts
+class<-rep("dhcp",data_count[1])
+dhcptime<-data.frame(number,time,class)
+
+#Create data frame of ftp's timestamp
+number<-c(1:data_count[2])
+time<-ftpdata$ts
+class<-rep("ftp",data_count[2])
+ftptime<-data.frame(number,time,class)
+
+#Create data frame of smtp's timestamp
+number<-c(1:data_count[3])
+time<-smtpdata$ts
+class<-rep("smtp",data_count[3])
+smtptime<-data.frame(number,time,class)
+
+#Create data frame of tunnel's timestamp
+number<-c(1:data_count[4])
+time<-tunneldata$ts
+class<-rep("tunnel",data_count[4])
+tunneltime<-data.frame(number,time,class)
+
+#Merge the above data frame
+totaltime<-rbind(dhcptime,ftptime,smtptime,tunneltime)
+
+#Scatterplot
+ggplot(totaltime,aes(x=time,y=number,colour=class)) +geom_point() +ggtitle("Various data's timestamp") +theme(plot.title=element_text(hjust = 0.5))
+```
+
+The highest point on the y-axis of each type of data also represents its count.
+
+All connections are gathered on two time periods. There is no such four connections for a period of time, perhaps it is a network interruption or there are other connections.
+
+Different connection timestamps have different changes, Most ftp occurs in an earlier time period, dhcp is relatively continuous and uniform, while smtp and tunnel are relatively intermittent.
+
+
+
+## Activity 1.4: Originating endpoint’s TCP/UDP port (or ICMP code)
+
+```{r}
+sort(table(dhcpdata$id.orig_p), decreasing=TRUE)[1:5]
+sort(table(ftpdata$id.orig_p), decreasing=TRUE)[1:5]
+sort(table(smtpdata$id.orig_p), decreasing=TRUE)[1:5]
+sort(table(tunneldata$id.orig_p), decreasing=TRUE)[1:5]
+```
+
+Dhcp is special, it has only one originating port, and other connections have multiple ports.
+
+```{r}
+#
+print("The ten most ftp originating ports and their frequencies")
+sort(table(ftpdata$id.orig_p), decreasing=TRUE)[1:12]
+
+#Frequency distribution histogram
+ftpdata$id.orig_p<-as.character(ftpdata$id.orig_p)
+ggplot(ftpdata,aes(id.orig_p)) +geom_bar(color="#6495ED",fill="#6495ED") +ggtitle("ftp's originating TCP/UDP port") +theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1,size=6),plot.title=element_text(hjust = 0.5))
+```
+
+Ftp has seven commonly used originating ports, and during this period of time have been connected 772 times, but I am not clear about its specific meaning, I think it is worth studying.
+
+
+
+## Activity 1.5: Responding endpoint’s TCP/UDP port (or ICMP code) 
+
+```{r}
+sort(table(dhcpdata$id.resp_p), decreasing=TRUE)[1:3]
+sort(table(ftpdata$id.resp_p), decreasing=TRUE)[1:3]
+sort(table(smtpdata$id.resp_p), decreasing=TRUE)[1:3]
+sort(table(tunneldata$id.resp_p), decreasing=TRUE)[1:3]
+```
+
+All connections have only one responding port.
+
+
+
+## Activity 1.6: Originating endpoint’s IP address (AKA ORIG) 
+
+```{r}
+#Create data frame of dhcp's originating IP 
+number<-c(1:data_count[1])
+origIP<-dhcpdata$id.orig_h
+class<-rep("dhcp",data_count[1])
+dhcporigIP<-data.frame(number,origIP,class)
+
+#Create data frame of ftp's originating IP
+number<-c(1:data_count[2])
+origIP<-ftpdata$id.orig_h
+class<-rep("ftp",data_count[2])
+ftporigIP<-data.frame(number,origIP,class)
+
+#Create data frame of smtp's originating IP
+number<-c(1:data_count[3])
+origIP<-smtpdata$id.orig_h
+class<-rep("smtp",data_count[3])
+smtporigIP<-data.frame(number,origIP,class)
+
+#Create data frame of tunnel's originating IP
+number<-c(1:data_count[4])
+origIP<-tunneldata$id.orig_h
+class<-rep("tunnel",data_count[4])
+tunnelorigIP<-data.frame(number,origIP,class)
+
+#Merge the above data frame
+totalorigIP<-rbind(dhcporigIP,ftporigIP,smtporigIP,tunnelorigIP)
+
+#Stacked column chart
+ggplot(totalorigIP,aes(factor(origIP),fill=factor(class)))+geom_bar() +ggtitle("Various data's originating endpoint’s IP address") +theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1,size=4),plot.title=element_text(hjust = 0.5))
+```
+
+There are a lot of originating endpoint’s IP addresses, some of them only send one type of connection, and some addresses send multiple connections.
+
+Most of ftp and dhcp are gathered on one originating endpoint’s IP address respectively.
+
+
+
+## Activity 1.7: Responding endpoint’s IP address (AKA ORIG) 
+```{r}
+#Create data frame of dhcp's responding IP 
+number<-c(1:data_count[1])
+respIP<-dhcpdata$id.resp_h
+class<-rep("dhcp",data_count[1])
+dhcprespIP<-data.frame(number,respIP,class)
+
+#Create data frame of ftp's responding IP
+number<-c(1:data_count[2])
+respIP<-ftpdata$id.orig_h
+class<-rep("ftp",data_count[2])
+ftprespIP<-data.frame(number,respIP,class)
+
+#Create data frame of smtp's responding IP
+number<-c(1:data_count[3])
+respIP<-smtpdata$id.orig_h
+class<-rep("smtp",data_count[3])
+smtprespIP<-data.frame(number,respIP,class)
+
+#Create data frame of tunnel's responding IP
+number<-c(1:data_count[4])
+respIP<-tunneldata$id.orig_h
+class<-rep("tunnel",data_count[4])
+tunnelrespIP<-data.frame(number,respIP,class)
+
+#Merge the above data frame
+totalrespIP<-rbind(dhcprespIP,ftprespIP,smtprespIP,tunnelrespIP)
+
+#Stacked column chart
+ggplot(totalrespIP,aes(factor(respIP),fill=factor(class)))+geom_bar() +ggtitle("Various data's responding endpoint’s IP address") +theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1),plot.title=element_text(hjust = 0.5))
+```
+
+There are several responding endpoint’s IP addresses, some of them only receive one type of connection, and some addresses receive multiple connections.
+
+Most of ftp and dhcp are gathered on one responding endpoint’s IP address respectively.
+
+
+
+## Activity 2.1: Download and read the data
+
+```{r}
+library(caret)
+url <- "http://kdd.ics.uci.edu/databases/kddcup99/kddcup.names"
+req <- "D:\\dst\\data\\kddcup.names"
+if(file.access(req)){
+  download.file(url,req)
+}
+kddata<-read.csv("D:\\dst\\data\\kddcup.data_10_percent.gz")
+kddnames=read.table("D:\\dst\\data\\kddcup.names",sep=":",skip=1,as.is=T)
+colnames(kddata)=c(kddnames[,1],"normal")
+head(kddata)
+```
+
+
+
+## Activity 2.2: Preprocess and classify data
+
+Attacks fall into four main categories:
+
+1) DOS: denial-of-service, e.g. syn flood;
+
+2) R2L: unauthorized access from a remote machine, e.g. guessing password;
+
+3) U2R: unauthorized access to local superuser (root) privileges, e.g., various ``buffer overflow’’ attacks;
+
+4) probing: surveillance and other probing, e.g., port scanning.
+
+```{r}
+# Preprocessing the data
+kddata$duration = as.numeric(as.character(kddata$duration))
+kddata$protocol_type = factor(kddata$protocol_type)
+kddata$service = factor(kddata$service)
+kddata$flag = factor(kddata$flag)
+kddata$src_bytes = as.numeric(as.character(kddata$src_bytes))
+kddata$dst_bytes = as.numeric(as.character(kddata$dst_bytes))
+kddata$land = factor(kddata$land)
+kddata$wrong_fragment = as.numeric(as.character(kddata$wrong_fragment))
+kddata$urgent = as.numeric(as.character(kddata$urgent))
+kddata$hot = as.numeric(as.character(kddata$hot))
+kddata$num_failed_logins = as.numeric(as.character(kddata$num_failed_logins))
+kddata$logged_in = factor(kddata$logged_in)
+kddata$num_compromised = as.numeric(as.character(kddata$num_compromised))
+kddata$root_shell = factor(kddata$root_shell)
+kddata$su_attempted = factor(kddata$su_attempted)
+kddata$num_root = as.numeric(as.character(kddata$num_root))
+kddata$num_file_creations = as.numeric(as.character(kddata$num_file_creations))
+kddata$num_shells = as.numeric(as.character(kddata$num_shells))
+kddata$num_access_files = as.numeric(as.character(kddata$num_access_files))
+# kddata$num_outbound_cmds = as.numeric(as.character(kddata$num_outbound_cmds))
+# kddata$is_hot_login = factor(kddata$is_hot_login)
+kddata$is_guest_login = factor(kddata$is_guest_login)
+kddata$count = as.numeric(as.character(kddata$count))
+kddata$srv_count = as.numeric(as.character(kddata$srv_count))
+kddata$serror_rate = as.numeric(as.character(kddata$serror_rate))
+kddata$srv_serror_rate = as.numeric(as.character(kddata$srv_serror_rate))
+kddata$rerror_rate = as.numeric(as.character(kddata$rerror_rate))
+kddata$srv_rerror_rate = as.numeric(as.character(kddata$srv_rerror_rate))
+kddata$same_srv_rate = as.numeric(as.character(kddata$same_srv_rate))
+kddata$diff_srv_rate = as.numeric(as.character(kddata$diff_srv_rate))
+kddata$srv_diff_host_rate = as.numeric(as.character(kddata$srv_diff_host_rate))
+kddata$dst_host_count = as.numeric(as.character(kddata$dst_host_count))
+kddata$dst_host_srv_count = as.numeric(as.character(kddata$dst_host_srv_count))
+kddata$dst_host_same_srv_rate = as.numeric(as.character(kddata$dst_host_same_srv_rate))
+kddata$dst_host_diff_srv_rate = as.numeric(as.character(kddata$dst_host_diff_srv_rate))
+kddata$dst_host_same_src_port_rate = as.numeric(as.character(kddata$dst_host_same_src_port_rate))
+kddata$dst_host_srv_diff_host_rate = as.numeric(as.character(kddata$dst_host_srv_diff_host_rate))
+kddata$dst_host_serror_rate = as.numeric(as.character(kddata$dst_host_serror_rate))
+kddata$dst_host_srv_serror_rate = as.numeric(as.character(kddata$dst_host_srv_serror_rate))
+kddata$dst_host_rerror_rate = as.numeric(as.character(kddata$dst_host_rerror_rate))
+kddata$dst_host_srv_rerror_rate = as.numeric(as.character(kddata$dst_host_srv_rerror_rate))
+
+# normal preprocess
+# The normal is classified into 5 groups 
+# Subsetting the normal variable into 5 groups.
+
+kddata$normal = as.character(kddata$normal)
+kddata$normal[kddata$normal == "ipsweep."] = "probe"
+kddata$normal[kddata$normal == "portsweep."] = "probe"
+kddata$normal[kddata$normal == "nmap."] = "probe"
+kddata$normal[kddata$normal == "satan."] = "probe"
+kddata$normal[kddata$normal == "buffer_overflow."] = "u2r"
+kddata$normal[kddata$normal == "loadmodule."] = "u2r"
+kddata$normal[kddata$normal == "perl."] = "u2r"
+kddata$normal[kddata$normal == "rootkit."] = "u2r"
+kddata$normal[kddata$normal == "back."] = "dos"
+kddata$normal[kddata$normal == "land."] = "dos"
+kddata$normal[kddata$normal == "neptune."] = "dos"
+kddata$normal[kddata$normal == "pod."] = "dos"
+kddata$normal[kddata$normal == "smurf."] = "dos"
+kddata$normal[kddata$normal == "teardrop."] = "dos"
+kddata$normal[kddata$normal == "ftp_write."] = "r2l"
+kddata$normal[kddata$normal == "guess_passwd."] = "r2l"
+kddata$normal[kddata$normal == "imap."] = "r2l"
+kddata$normal[kddata$normal == "multihop."] = "r2l"
+kddata$normal[kddata$normal == "phf."] = "r2l"
+kddata$normal[kddata$normal == "spy."] = "r2l"
+kddata$normal[kddata$normal == "warezclient."] = "r2l"
+kddata$normal[kddata$normal == "warezmaster."] = "r2l"
+kddata$normal[kddata$normal == "normal."] = "normal"
+kddata$normal = as.factor(kddata$normal)
+```
+
+
+
+## Activity 2.3: Analyze the influence of each attribute on the intrusion type
+
+```{r}
+qplot(dst_host_same_src_port_rate,dst_host_srv_diff_host_rate,colour=normal,data=kddata)
+```
+
+"dst_host_same_src_port_rate" is a slight predictor.
+
+
+```{r}
+qplot(service,flag,colour=normal,data=kddata)
+```
+
+"flag" is a strong predictor, when "flag" = "REJ" and "S0", intrusion type is "dos".
+
+
+```{r}
+qplot(duration,src_bytes,colour=normal,data=kddata)
+```
+
+"duration" is a strong predictor, when "duration" > 30000, intrusion type is "probe".
+
+
+```{r}
+qplot(service,protocol_type,colour=normal,data=kddata)
+```
+
+"protocol-type" is also a strong predictor of "dos" type, when "protocol-type" = "tcp", intrusion type is "dos".
+
+
+```{r}
+qplot(flag,land,colour=normal,data=kddata)
+```
+
+No clear information.
+
+
+```{r}
+qplot(serror_rate,srv_serror_rate,colour=normal,data=kddata)
+```
+
+"serror_rate" and "srv_serror_rate" is two strong predictors, when "serror_rate" > 0.5 and "srv_serror_rate" = 0 or 1, intrusion type is "dos"; when "serror_rate" < 0.5 and "srv_serror_rate" = 0 or 1, intrusion type is "probe"
+
+
+```{r}
+qplot(dst_host_rerror_rate,dst_host_srv_rerror_rate,colour=normal,data=kddata)
+```
+
+"dst_host_rerror_rate" and "dst_host_srv_rerror_rate" are two strong predictors, when "dst_host_rerror_rate" = 1, intrusion type is "probe".
+
+
+```{r}
+qplot(num_root,num_shells,colour=normal,data=kddata)
+```
+
+No clear information.
+
+
+```{r}
+qplot(serror_rate,rerror_rate,colour=normal,data=kddata)
+```
+
+"serror_rate" and "rerror_rate" are two strong predictors, when "serror_rate" + "rerror_rate" =1 and "serror_rate" < 0.875, intrusion type is "probe", but when "serror_rate" > 0.875, intrusion type is "dos".
+
+
+## Conclusion
+
+1) Ftp, dhcp, smtp, tunnel are different protocols or connections. For example, ftp is a file transfer protocol, dhcp is a dynamic host configuration protocol, smtp is an email transfer protocol. According to the data analysis above, they have different properties and phenomena in many ways, including count(frequency), timestamp, Originating/Responding endpoint’s TCP/UDP port,  Originating/Responding endpoint’s IP address, and so on.
+
+2) According to the data analysis above, there are many strong predictors on intrusion type, such as "flag","duration","protocol-type","serror_rate" and "srv_serror_rate", and there are also some slight predictors on intrusion type like "dst_host_same_src_port_rate".
+
+
+
+## References
+
+http://www.netresec.com/?page=MACCDC  MACCDC2012 data source
+
+https://drive.google.com/drive/folders/1qBmJhVqPprD-esGKgtm6VLn_YOpjawJ-  MACCDC2012 data source
+
+http://gauss.ececs.uc.edu/Courses/c6055/pdf/bro_log_vars.pdf  Network data bro Logs
+
+http://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html  KDD Cup 1999 data sourece
+
+https://rstudio-pubs-static.s3.amazonaws.com/196063_b22a7dcd2ec24413b13b280f4865a2c2.html  KDD Cup 1999 data analysis
+
+
+
