@@ -1,0 +1,5 @@
+You can open the html file in GitHub, copy the URL and open this website to view the html: 
+
+http://htmlpreview.github.io/
+
+Or add “http://htmlpreview.github.io/?” before the URL of html to view  it directly.
