@@ -1,0 +1,148 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+## network visualization
+# reference 
+  https://github.com/kateto/R-igraph-Network-Workshop-NetSciX
+  https://github.com/jdwilson4/Network-Analysis-I
+  dataset: enron email dataset
+
+## example data
+# set the working directory to the folder containing the files:
+```{r}
+setwd("D:\\SSS\\MSC\\dst\\git\\git\\Network-Analysis-I\\Data")
+```
+
+# reading data
+```{r}
+pol.data<-read.table("polblogs.txt",header=T)
+```
+
+# convert data to matrix
+
+```{r}
+pol.edge<-as.matrix(pol.data)+1
+```
+
+
+# convet network edge data to 'igraph' objects
+
+# general igraph
+
+```{r}
+library(igraph)
+pol.igraph<-graph.edgelist(pol.edge)
+```
+
+# undirected igraph
+
+```{r}
+pol.undirected.graph<-graph.edgelist(pol.edge,directed = F)
+```
+
+# adjacency matrix from igraph object
+
+```{r}
+pol.adjacency<-as_adj(pol.igraph)
+```
+
+# adjacency matrix visualization
+
+```{r}
+library(Matrix)
+image(pol.adjacency)
+```
+
+# create network from edge list
+
+```{r}
+library(network)
+pol.network<-network(pol.edge)
+pol.x<-plot(pol.network,main=paste("political blog network"),usearrows=T,edge.col="grey50",vertex.col="yellow")
+```
+
+# color vertices according to known labels&plot
+
+```{r}
+pol.labels<-append(rep(4,758),rep(2,732),after = 758)
+```
+
+# color the lavels according to political party
+
+```{r}
+plot(pol.network,main="political blog network",usearrows=T,edge.col="grey50",coord=pol.x,vertex.col=pol.labels)
+```
+
+
+
+## enron email dataset 
+
+# reading data
+```{r}
+setwd("D:\\SSS\\MSC\\dst\\git\\git\\Network-Analysis-I\\Data")
+node.data<-read.table("email-Enron.txt",header=T)
+```
+
+# convert data to matrix
+
+```{r}
+node.edge<-as.matrix(node.data)+1
+```
+
+# convert network data to 'igraph' objects
+
+# general igraph(directed)
+
+```{r}
+library(igraph)
+node.igraph<-graph.edgelist(node.edge)
+```
+
+# undirected igraph
+
+```{r}
+node.un.graph<-graph.edgelist(node.edge,directed = F)
+```
+
+# adjacency matrix from igraph object
+
+```{r}
+node.adja<-as_adj(node.igraph)
+```
+
+# adjacency matrix visualization
+
+```{r}
+library(Matrix)
+image(node.adja)
+```
+
+# create network from edge list
+
+```{r}
+library(network)
+node.network<-network(node.edge)
+node.x<-plot(node.network,main = paste("email network"),usearrows=T,edge.col="blue",vertex.col="red")
+```
+
+# color vertices according to known labels&plot
+
+```{r}
+node.labels<-append(rep(4,18352),rep(2,18300),after = 18352)
+```
+
+# color the lavels according to email
+
+```{r}
+plot(node.network,main="email network",usearrows=T,edge.col="purple",coord=node.x,vertex.col=node.labels)
+```
+
+
+
+
+
+
+
+
